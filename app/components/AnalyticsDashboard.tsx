@@ -216,7 +216,7 @@ export function AnalyticsDashboard() {
           ฟีเจอร์ Analytics จะเปิดใช้งานภายหลัง ติดตามได้เลย!! 
         </p>
         <a
-          href="https://getlate.dev"
+          href="https://sync-socia.vercel.app/"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 transition"
