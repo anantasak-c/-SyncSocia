@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { createLateProfile } from "@/lib/late";
+import { createLateProfile, listProfiles } from "@/lib/late";
 
 export const dynamic = "force-dynamic";
 
@@ -116,11 +116,35 @@ export async function POST() {
       });
     }
 
-    // POST /v1/profiles — create a new Late profile
-    const lateResult = await createLateProfile(
-      user.email || "SyncSocial User"
-    );
-    const lateProfileId = lateResult.profile._id;
+    let lateProfileId: string;
+
+    try {
+      const lateResult = await createLateProfile(
+        user.email || "SyncSocial User"
+      );
+      lateProfileId = lateResult.profile._id;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "เกิดข้อผิดพลาด";
+
+      if (
+        message.includes("Profile limit reached") ||
+        message.includes("profile limit") ||
+        message.includes("limit reached")
+      ) {
+        const profilesResult = await listProfiles();
+        const fallbackProfile =
+          profilesResult.profiles.find((item) => item.isDefault) ||
+          profilesResult.profiles[0];
+
+        if (!fallbackProfile?._id) {
+          throw new Error("ไม่พบโปรไฟล์ที่สามารถใช้งานได้");
+        }
+
+        lateProfileId = fallbackProfile._id;
+      } else {
+        throw err;
+      }
+    }
 
     // Save the late_profile_id to Supabase
     // Upsert to ensure profile exists

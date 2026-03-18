@@ -48,6 +48,22 @@ export async function createLateProfile(name: string) {
   });
 }
 
+export async function listProfiles() {
+  return lateRequest<{
+    profiles: Array<{
+      _id: string;
+      userId?: string;
+      name: string;
+      description?: string;
+      color?: string;
+      isDefault?: boolean;
+      createdAt?: string;
+    }>;
+  }>("/v1/profiles", {
+    method: "GET",
+  });
+}
+
 // GET /v1/connect/{platform} — Get OAuth URL
 export async function getConnectUrl(
   platform: string,
