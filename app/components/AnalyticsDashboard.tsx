@@ -19,6 +19,17 @@ import {
   Twitter,
   Instagram,
   Link2,
+  Sparkles,
+  Zap,
+  Crown,
+  ChevronRight,
+  Play,
+  Target,
+  Award,
+  PieChart,
+  CalendarDays,
+  ThumbsUp,
+  LayoutDashboard,
 } from "lucide-react";
 
 // ---- Types ----
@@ -282,7 +293,7 @@ export function AnalyticsDashboard() {
     );
   }
 
-  // ---- Add-on Required ----
+  // ---- Add-on Required — Premium Showcase ----
   if (addonRequired) {
     const showcaseTotals = SHOWCASE_DAILY_DATA.reduce(
       (acc, d) => ({
@@ -298,78 +309,100 @@ export function AnalyticsDashboard() {
       { impressions: 0, reach: 0, likes: 0, comments: 0, shares: 0, saves: 0, clicks: 0, views: 0 }
     );
     const showcaseMaxImpressions = Math.max(...SHOWCASE_DAILY_DATA.map((d) => d.metrics.impressions), 1);
+    const maxPlatformImpressions = Math.max(...SHOWCASE_PLATFORM_BREAKDOWN.map((p) => p.impressions), 1);
 
     return (
-      <div className="space-y-6">
-        <div className="py-8 px-5 bg-gradient-to-br from-amber-50 via-white to-primary-50 rounded-2xl border border-amber-200">
-          <div className="max-w-3xl mx-auto text-center">
-            <BarChart3 className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">Analytics กำลังจะเปิดขายใน SyncSocial</h3>
-            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
-              ตอนนี้ยังเป็นตัวอย่างหน้ารายงาน แต่คุณสามารถใช้หน้านี้เป็นโชว์เคสให้ลูกค้าเห็นได้ทันทีว่า
-              จะรู้ยอดรวม, เห็นแพลตฟอร์มที่คุ้ม, และรู้เวลาโพสต์ที่เหมาะที่สุด
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs sm:text-sm text-slate-600">
-              <span className="px-3 py-1 rounded-full bg-white border border-slate-200">ดูยอดรวมในหน้าเดียว</span>
-              <span className="px-3 py-1 rounded-full bg-white border border-slate-200">รู้เวลาโพสต์ที่ควรลง</span>
-              <span className="px-3 py-1 rounded-full bg-white border border-slate-200">เห็นชัดว่าแพลตฟอร์มไหนทำเงิน</span>
+      <div className="space-y-5">
+        {/* ── Hero Banner ── */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600 p-6 sm:p-8 text-white">
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative z-10 max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-xs font-medium mb-4">
+              <Sparkles className="w-3.5 h-3.5" /> ตัวอย่างรายงาน Analytics
             </div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 leading-tight">
+              เห็นทุกตัวเลขสำคัญ<br className="sm:hidden" /> ในหน้าเดียว
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 max-w-xl mx-auto leading-relaxed">
+              รู้ว่าโพสต์ไหนทำผลงานดี แพลตฟอร์มไหนคุ้ม และควรโพสต์เวลาไหน<br className="hidden sm:block" />
+              ไม่ต้องเปิดหลายแอป — ดูที่เดียวจบ
+            </p>
             <button
-              onClick={() => setShowShowcase((prev) => !prev)}
-              className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 transition"
+              onClick={() => setShowShowcase((v) => !v)}
+              className="inline-flex items-center gap-2 mt-5 px-6 py-2.5 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 shadow-lg shadow-indigo-900/30 transition-all active:scale-95"
             >
-              ดูตัวอย่าง <ArrowUpRight className="w-4 h-4" />
+              {showShowcase ? "ซ่อนตัวอย่าง" : "ดูตัวอย่าง"} <Play className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {showShowcase && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <ShowcaseCard
-                icon={<Eye className="w-5 h-5 text-primary-500" />}
-                title="ลูกค้าเห็นยอดที่สำคัญทันที"
-                description="ไม่ต้องเปิดหลายแอปเพื่อไล่ดู Reach, Click และ Engagement ทีละช่องทาง"
+          <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* ── Feature Highlights ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <FeatureCard
+                icon={<LayoutDashboard className="w-5 h-5" />}
+                color="indigo"
+                title="ดูยอดรวมในหน้าเดียว"
+                desc="เห็น Reach, Click และ Engagement ทุกช่องทางรวมกัน ไม่ต้องเปิดหลายแอป"
               />
-              <ShowcaseCard
-                icon={<Clock className="w-5 h-5 text-amber-500" />}
+              <FeatureCard
+                icon={<CalendarDays className="w-5 h-5" />}
+                color="amber"
                 title="รู้เวลาโพสต์ที่คุ้มที่สุด"
-                description="ช่วยตัดสินใจง่ายขึ้นว่าโพสต์ช่วงไหนแล้วคนเห็นมาก คนมีโอกาสทักหรือคลิกมากกว่า"
+                desc="ระบบวิเคราะห์ให้ว่าช่วงเวลาไหนมีคนเห็นเยอะ คนทักหรือคลิกมากกว่า"
               />
-              <ShowcaseCard
-                icon={<TrendingUp className="w-5 h-5 text-emerald-500" />}
-                title="เห็นว่าควรทุ่มแพลตฟอร์มไหน"
-                description="เทียบผลลัพธ์แต่ละช่องทางได้ชัดเจน เพื่อวางแผนงบและเวลาให้คุ้มขึ้น"
+              <FeatureCard
+                icon={<Target className="w-5 h-5" />}
+                color="emerald"
+                title="เทียบผลแต่ละแพลตฟอร์ม"
+                desc="รู้ทันทีว่า Facebook, IG หรือ TikTok ตัวไหนคุ้มค่าเวลาและงบที่ลงไป"
               />
             </div>
 
+            {/* ── Key Metrics ── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard icon={<BarChart3 className="w-4 h-4" />} label="โพสต์ทั้งหมด" value={SHOWCASE_OVERVIEW.totalPosts} />
-              <StatCard icon={<Eye className="w-4 h-4" />} label="Impressions" value={showcaseTotals.impressions} />
-              <StatCard icon={<Users className="w-4 h-4" />} label="Reach" value={showcaseTotals.reach} />
-              <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Engagement" value={showcaseTotals.likes + showcaseTotals.comments + showcaseTotals.shares} />
+              <GlowStatCard icon={<BarChart3 className="w-5 h-5" />} color="indigo" label="โพสต์ทั้งหมด" value={SHOWCASE_OVERVIEW.totalPosts} suffix="โพสต์" />
+              <GlowStatCard icon={<Eye className="w-5 h-5" />} color="blue" label="ยอดเห็น (Impressions)" value={showcaseTotals.impressions} />
+              <GlowStatCard icon={<Users className="w-5 h-5" />} color="violet" label="คนเข้าถึง (Reach)" value={showcaseTotals.reach} />
+              <GlowStatCard icon={<ThumbsUp className="w-5 h-5" />} color="emerald" label="ปฏิสัมพันธ์รวม" value={showcaseTotals.likes + showcaseTotals.comments + showcaseTotals.shares} />
             </div>
 
+            {/* ── Engagement Breakdown Pills ── */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <MiniStat icon={<Heart className="w-3.5 h-3.5 text-red-500" />} label="Likes" value={showcaseTotals.likes} />
-              <MiniStat icon={<MessageCircle className="w-3.5 h-3.5 text-blue-500" />} label="Comments" value={showcaseTotals.comments} />
-              <MiniStat icon={<Share2 className="w-3.5 h-3.5 text-green-500" />} label="Shares" value={showcaseTotals.shares} />
-              <MiniStat icon={<Bookmark className="w-3.5 h-3.5 text-amber-500" />} label="Saves" value={showcaseTotals.saves} />
-              <MiniStat icon={<MousePointerClick className="w-3.5 h-3.5 text-purple-500" />} label="Clicks" value={showcaseTotals.clicks} />
-              <MiniStat icon={<Eye className="w-3.5 h-3.5 text-cyan-500" />} label="Views" value={showcaseTotals.views} />
+              <PillStat icon={<Heart className="w-3.5 h-3.5" />} color="rose" label="กดถูกใจ" value={showcaseTotals.likes} />
+              <PillStat icon={<MessageCircle className="w-3.5 h-3.5" />} color="blue" label="คอมเมนต์" value={showcaseTotals.comments} />
+              <PillStat icon={<Share2 className="w-3.5 h-3.5" />} color="green" label="แชร์" value={showcaseTotals.shares} />
+              <PillStat icon={<Bookmark className="w-3.5 h-3.5" />} color="amber" label="บันทึก" value={showcaseTotals.saves} />
+              <PillStat icon={<MousePointerClick className="w-3.5 h-3.5" />} color="purple" label="คลิก" value={showcaseTotals.clicks} />
+              <PillStat icon={<Eye className="w-3.5 h-3.5" />} color="cyan" label="ยอดดู" value={showcaseTotals.views} />
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">ตัวอย่างกราฟยอดเห็นโพสต์ (14 วันล่าสุด)</h3>
-              <div className="flex items-end gap-1 h-24">
+            {/* ── Impressions Chart ── */}
+            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-indigo-500" /> กราฟยอดเห็นโพสต์ 14 วัน
+                </h3>
+                <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">ข้อมูลตัวอย่าง</span>
+              </div>
+              <div className="flex items-end gap-[3px] h-32">
                 {SHOWCASE_DAILY_DATA.slice(-14).map((d, i) => {
-                  const h = Math.max((d.metrics.impressions / showcaseMaxImpressions) * 100, 2);
+                  const pct = Math.max((d.metrics.impressions / showcaseMaxImpressions) * 100, 4);
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
-                      <div className="w-full bg-primary-400 rounded-t hover:bg-primary-500 transition-colors cursor-default" style={{ height: `${h}%` }} />
-                      <span className="text-[9px] text-slate-400">{new Date(d.date).getDate()}</span>
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap z-10">
-                        {d.date}: {formatNumber(d.metrics.impressions)}
+                      <div
+                        className="w-full rounded-t-md bg-gradient-to-t from-indigo-500 to-blue-400 hover:from-indigo-600 hover:to-blue-500 transition-all cursor-default"
+                        style={{ height: `${pct}%` }}
+                      />
+                      <span className="text-[9px] text-slate-400 font-medium">{new Date(d.date).getDate()}</span>
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-20">
+                        <div className="bg-slate-800 text-white text-[10px] px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                          <span className="font-semibold">{formatNumber(d.metrics.impressions)}</span> ยอดเห็น
+                        </div>
+                        <div className="w-1.5 h-1.5 bg-slate-800 rotate-45 -mt-0.5" />
                       </div>
                     </div>
                   );
@@ -377,60 +410,38 @@ export function AnalyticsDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white border border-slate-100 rounded-xl p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">ลูกค้าจะเห็นอะไรบ้าง</h3>
-                <div className="space-y-3">
-                  <ShowcaseListItem title="สรุปผลรวมรายสัปดาห์และรายเดือน" description="เห็นว่าโพสต์ทั้งหมดสร้าง Reach, Click และ Engagement ได้มากแค่ไหน" />
-                  <ShowcaseListItem title="เปรียบเทียบแต่ละแพลตฟอร์ม" description="รู้เลยว่า Facebook, Instagram หรือ TikTok ตัวไหนคุ้มกับเวลาที่ลงไป" />
-                  <ShowcaseListItem title="แนะนำเวลาโพสต์ที่เหมาะ" description="ช่วยให้ทีมไม่ต้องเดาเอง และเลือกเวลาที่มีโอกาสได้ผลดีกว่า" />
-                </div>
-              </div>
-
-              <div className="bg-white border border-slate-100 rounded-xl p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-400" /> เวลาโพสต์ที่ดีที่สุด
-                </h3>
-                <div className="space-y-2">
-                  {SHOWCASE_BEST_TIMES.map((slot, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-100">
-                      <span className="text-lg font-bold text-primary-600 w-7 text-center">#{i + 1}</span>
-                      <div className="flex-1">
-                        <span className="text-sm font-medium text-slate-700">
-                          {DAY_LABELS[slot.day_of_week]} {String(slot.hour).padStart(2, "0")}:00 น.
-                        </span>
-                        <span className="text-xs text-slate-400 ml-2">({slot.post_count} โพสต์)</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-emerald-600">{formatNumber(Math.round(slot.avg_engagement))}</span>
-                        <span className="text-[10px] text-slate-400 ml-1">avg eng.</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-100 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">แยกตามแพลตฟอร์ม</h3>
-              <div className="space-y-3">
+            {/* ── Platform Breakdown ── */}
+            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                <PieChart className="w-4 h-4 text-indigo-500" /> เปรียบเทียบแต่ละแพลตฟอร์ม
+              </h3>
+              <div className="space-y-4">
                 {SHOWCASE_PLATFORM_BREAKDOWN.map((pb) => {
                   const Icon = platformIcon(pb.platform);
+                  const color = platformColor(pb.platform);
+                  const pct = Math.round((pb.impressions / maxPlatformImpressions) * 100);
                   const totalEng = pb.likes + pb.comments + pb.shares + pb.saves;
                   return (
-                    <div key={pb.platform} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 border border-slate-100">
-                        <Icon className="w-4 h-4" style={{ color: platformColor(pb.platform) }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-slate-700 capitalize">{pb.platform}</span>
-                          <span className="text-xs text-slate-400">{pb.postCount} โพสต์</span>
+                    <div key={pb.platform}>
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style={{ backgroundColor: color + "14" }}>
+                          <Icon className="w-4.5 h-4.5" style={{ color }} />
                         </div>
-                        <div className="flex gap-3 text-[11px] text-slate-500 flex-wrap">
-                          <span>{formatNumber(pb.impressions)} imp.</span>
-                          <span>{formatNumber(pb.reach)} reach</span>
-                          <span>{formatNumber(totalEng)} eng.</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-slate-800 capitalize">{pb.platform}</span>
+                            <span className="text-xs font-medium text-slate-500">{pb.postCount} โพสต์</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-12">
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
+                        </div>
+                        <div className="flex gap-4 text-[11px] text-slate-500">
+                          <span><strong className="text-slate-700">{formatNumber(pb.impressions)}</strong> ยอดเห็น</span>
+                          <span><strong className="text-slate-700">{formatNumber(pb.reach)}</strong> เข้าถึง</span>
+                          <span><strong className="text-slate-700">{formatNumber(totalEng)}</strong> ปฏิสัมพันธ์</span>
                         </div>
                       </div>
                     </div>
@@ -439,30 +450,111 @@ export function AnalyticsDashboard() {
               </div>
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">ตัวอย่างโพสต์ที่ทำผลงานดี</h3>
+            {/* ── Best Time + Value Props ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Best Time */}
+              <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                  <Clock className="w-4 h-4 text-amber-500" /> เวลาโพสต์ที่ดีที่สุด
+                </h3>
+                <div className="space-y-2">
+                  {SHOWCASE_BEST_TIMES.map((slot, i) => {
+                    const medals = ["🥇", "🥈", "🥉"];
+                    const medal = i < 3 ? medals[i] : `#${i + 1}`;
+                    const maxEng = SHOWCASE_BEST_TIMES[0].avg_engagement;
+                    const barPct = Math.round((slot.avg_engagement / maxEng) * 100);
+                    return (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+                        <span className="text-lg w-7 text-center">{medal}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-slate-800">
+                            {DAY_LABELS[slot.day_of_week]} {String(slot.hour).padStart(2, "0")}:00 น.
+                          </div>
+                          <div className="w-full h-1.5 bg-amber-100 rounded-full mt-1 overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: `${barPct}%` }} />
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-sm font-bold text-amber-700">{formatNumber(Math.round(slot.avg_engagement))}</div>
+                          <div className="text-[10px] text-slate-400">ปฏิสัมพันธ์เฉลี่ย</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Value Proposition */}
+              <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 rounded-2xl border border-indigo-100 p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                  <Crown className="w-4 h-4 text-indigo-500" /> ลูกค้าจะได้อะไรบ้าง
+                </h3>
+                <div className="space-y-3">
+                  <ValueItem
+                    icon={<Zap className="w-4 h-4 text-amber-500" />}
+                    title="สรุปผลรวมอัตโนมัติ"
+                    desc="ดูยอดรวมของทุกแพลตฟอร์มได้ทันที ไม่ต้องรวมเอง"
+                  />
+                  <ValueItem
+                    icon={<PieChart className="w-4 h-4 text-indigo-500" />}
+                    title="เทียบผลทุกช่องทาง"
+                    desc="เห็นชัดว่า Facebook, IG หรือ TikTok ตัวไหนคุ้มกว่า"
+                  />
+                  <ValueItem
+                    icon={<CalendarDays className="w-4 h-4 text-emerald-500" />}
+                    title="แนะนำเวลาโพสต์"
+                    desc="ไม่ต้องเดา ระบบบอกว่าโพสต์เวลาไหนได้ผลดีที่สุด"
+                  />
+                  <ValueItem
+                    icon={<Award className="w-4 h-4 text-violet-500" />}
+                    title="รู้ว่าโพสต์ไหนปัง"
+                    desc="จัดอันดับโพสต์ที่ทำผลงานดี เพื่อทำซ้ำสิ่งที่ได้ผล"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Top Posts ── */}
+            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                <Award className="w-4 h-4 text-indigo-500" /> โพสต์ที่ทำผลงานดีที่สุด
+              </h3>
               <div className="space-y-3">
-                {SHOWCASE_TOP_POSTS.map((post) => {
+                {SHOWCASE_TOP_POSTS.map((post, idx) => {
                   const Icon = platformIcon(post.platform);
+                  const color = platformColor(post.platform);
                   return (
-                    <div key={post._id} className="flex gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100 hover:shadow-sm transition">
-                      <div className="w-12 h-12 rounded-lg bg-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                        <Icon className="w-5 h-5" style={{ color: platformColor(post.platform) }} />
+                    <div key={post._id} className="flex gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-100 hover:shadow-md transition-shadow">
+                      <div className="relative shrink-0">
+                        <div className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm" style={{ backgroundColor: color + "14" }}>
+                          <Icon className="w-6 h-6" style={{ color }} />
+                        </div>
+                        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center shadow">
+                          {idx + 1}
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 line-clamp-2 mb-1">{post.content}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">
-                          <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" /> {formatNumber(post.analytics.impressions)}</span>
-                          <span className="flex items-center gap-0.5"><Heart className="w-3 h-3" /> {formatNumber(post.analytics.likes)}</span>
-                          <span className="flex items-center gap-0.5"><MessageCircle className="w-3 h-3" /> {formatNumber(post.analytics.comments)}</span>
-                          <span className="flex items-center gap-0.5"><Share2 className="w-3 h-3" /> {formatNumber(post.analytics.shares)}</span>
-                          <span className="flex items-center gap-0.5 text-emerald-600 font-medium"><TrendingUp className="w-3 h-3" /> {post.analytics.engagementRate.toFixed(1)}%</span>
+                        <p className="text-sm text-slate-700 line-clamp-2 mb-2 leading-relaxed">{post.content}</p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500">
+                          <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-blue-400" /> <strong className="text-slate-700">{formatNumber(post.analytics.impressions)}</strong> เห็น</span>
+                          <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-rose-400" /> <strong className="text-slate-700">{formatNumber(post.analytics.likes)}</strong></span>
+                          <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5 text-blue-400" /> <strong className="text-slate-700">{formatNumber(post.analytics.comments)}</strong></span>
+                          <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-green-400" /> <strong className="text-slate-700">{formatNumber(post.analytics.shares)}</strong></span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
+                            <TrendingUp className="w-3 h-3" /> {post.analytics.engagementRate.toFixed(1)}%
+                          </span>
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+            </div>
+
+            {/* ── CTA Footer ── */}
+            <div className="text-center py-4">
+              <p className="text-xs text-slate-400 mb-1">ข้อมูลด้านบนเป็นตัวอย่างสำหรับโชว์เคส</p>
+              <p className="text-xs text-slate-400">เมื่อเปิดใช้งาน Analytics จะแสดงข้อมูลจริงจากทุกแพลตฟอร์มของคุณ</p>
             </div>
           </div>
         )}
@@ -723,21 +815,59 @@ function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function ShowcaseCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+const COLOR_MAP: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
+  indigo:  { bg: "bg-indigo-50",  text: "text-indigo-600",  border: "border-indigo-100",  iconBg: "bg-indigo-100" },
+  amber:   { bg: "bg-amber-50",   text: "text-amber-600",   border: "border-amber-100",   iconBg: "bg-amber-100" },
+  emerald: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100", iconBg: "bg-emerald-100" },
+  blue:    { bg: "bg-blue-50",    text: "text-blue-600",    border: "border-blue-100",    iconBg: "bg-blue-100" },
+  violet:  { bg: "bg-violet-50",  text: "text-violet-600",  border: "border-violet-100",  iconBg: "bg-violet-100" },
+  rose:    { bg: "bg-rose-50",    text: "text-rose-600",    border: "border-rose-100",    iconBg: "bg-rose-100" },
+  green:   { bg: "bg-green-50",   text: "text-green-600",   border: "border-green-100",   iconBg: "bg-green-100" },
+  purple:  { bg: "bg-purple-50",  text: "text-purple-600",  border: "border-purple-100",  iconBg: "bg-purple-100" },
+  cyan:    { bg: "bg-cyan-50",    text: "text-cyan-600",    border: "border-cyan-100",    iconBg: "bg-cyan-100" },
+};
+
+function FeatureCard({ icon, color, title, desc }: { icon: React.ReactNode; color: string; title: string; desc: string }) {
+  const c = COLOR_MAP[color] || COLOR_MAP.indigo;
   return (
-    <div className="bg-white border border-slate-100 rounded-xl p-4">
-      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3">{icon}</div>
-      <h4 className="text-sm font-semibold text-slate-800 mb-1">{title}</h4>
-      <p className="text-sm text-slate-500 leading-6">{description}</p>
+    <div className={`rounded-2xl border ${c.border} ${c.bg} p-4 hover:shadow-md transition-shadow`}>
+      <div className={`w-10 h-10 rounded-xl ${c.iconBg} ${c.text} flex items-center justify-center mb-3`}>{icon}</div>
+      <h4 className="text-sm font-bold text-slate-800 mb-1">{title}</h4>
+      <p className="text-[13px] text-slate-500 leading-relaxed">{desc}</p>
     </div>
   );
 }
 
-function ShowcaseListItem({ title, description }: { title: string; description: string }) {
+function GlowStatCard({ icon, color, label, value, suffix }: { icon: React.ReactNode; color: string; label: string; value: number; suffix?: string }) {
+  const c = COLOR_MAP[color] || COLOR_MAP.indigo;
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <div className="text-sm font-semibold text-slate-800">{title}</div>
-      <div className="text-sm text-slate-500 mt-1">{description}</div>
+    <div className={`rounded-2xl border ${c.border} bg-white p-4 hover:shadow-md transition-shadow`}>
+      <div className={`w-9 h-9 rounded-xl ${c.iconBg} ${c.text} flex items-center justify-center mb-2`}>{icon}</div>
+      <div className="text-2xl font-extrabold text-slate-800 tracking-tight">{formatNumber(value)}{suffix && <span className="text-sm font-medium text-slate-400 ml-1">{suffix}</span>}</div>
+      <div className="text-xs text-slate-500 mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function PillStat({ icon, color, label, value }: { icon: React.ReactNode; color: string; label: string; value: number }) {
+  const c = COLOR_MAP[color] || COLOR_MAP.indigo;
+  return (
+    <div className={`rounded-xl border ${c.border} ${c.bg} p-2.5 text-center hover:shadow-sm transition-shadow`}>
+      <div className={`flex justify-center mb-1 ${c.text}`}>{icon}</div>
+      <div className="text-sm font-bold text-slate-800">{formatNumber(value)}</div>
+      <div className="text-[10px] text-slate-500 font-medium">{label}</div>
+    </div>
+  );
+}
+
+function ValueItem({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+  return (
+    <div className="flex gap-3 p-3 rounded-xl border border-slate-100 bg-white/80 hover:bg-white transition">
+      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">{icon}</div>
+      <div>
+        <div className="text-sm font-semibold text-slate-800">{title}</div>
+        <div className="text-[13px] text-slate-500 leading-relaxed mt-0.5">{desc}</div>
+      </div>
     </div>
   );
 }
