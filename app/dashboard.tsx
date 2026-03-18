@@ -370,7 +370,7 @@ export default function Dashboard() {
       setAuthError(
         authMode === "login"
           ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-          : "สมัครไม่สำเร็จ กรุณาลองใหม่"
+          : "ข้อความ Confirm ถูกส่งไปที่ Email ของคุณแล้ว"
       );
     }
   }
