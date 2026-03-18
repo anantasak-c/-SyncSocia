@@ -1,5 +1,6 @@
 "use client";
 
+import Image, { StaticImageData } from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -29,6 +30,10 @@ import {
 import { PostPreview } from "./components/PostPreview";
 import { ImageCropper } from "./components/ImageCropper";
 import { AnalyticsDashboard } from "./components/AnalyticsDashboard";
+import lineLogo from "../Logo/LINE_logo.svg.png";
+import telegramLogo from "../Logo/telegram logo.webp";
+import tiktokLogo from "../Logo/tiktok logo.png";
+import youtubeLogo from "../Logo/youtube logo.png";
 
 // ----- Types -----
 
@@ -64,46 +69,56 @@ interface PostHistory {
 
 // ----- Platform helpers -----
 
-function LineIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function ImagePlatformIcon({
+  src,
+  alt,
+  className,
+}: {
+  src: StaticImageData;
+  alt: string;
+  className?: string;
+}) {
+  const sizeClass = className?.match(/w-(\d+)|h-(\d+)/)?.[1];
+  const size = sizeClass ? Number(sizeClass) * 4 : 20;
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+    <Image
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
       className={className}
-      style={{ ...style, fill: "currentColor" }}
-    >
-      <path d="M21.16 7.9c-.35-3.5-3.35-6.15-7.06-6.15-4.5 0-8.1 3.25-8.1 7.25 0 2.9 1.9 5.45 4.7 6.6.6.35.4.9.25 1.7-.1.55-.35 1.55-.35 1.55-.1.55-.25 1.15.55.75s4.9-3.2 5.5-3.65c2.3-.5 4.15-2.25 4.5-4.5.05-.35.05-.75.05-1.15 0-.15 0-.25-.04-.4z" />
-    </svg>
+    />
   );
 }
 
-function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function LineIcon({ className }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 448 512"
-      className={className}
-      style={{ ...style, fill: "currentColor" }}
-    >
-      <path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a90.9 90.9 0 1 0-43 79.8h73.9V53.8a40.7 40.7 0 0 1 42.1-40.4 282.1 282.1 0 0 0 88.3 14 401.4 401.4 0 0 0 101.6-19.8v72.3z" />
-    </svg>
+    <ImagePlatformIcon src={lineLogo} alt="LINE OA" className={className} />
   );
+}
+
+function TikTokIcon({ className }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <ImagePlatformIcon src={tiktokLogo} alt="TikTok" className={className} />
+  );
+}
+
+function YouTubeIcon({ className }: { className?: string; style?: React.CSSProperties }) {
+  return <ImagePlatformIcon src={youtubeLogo} alt="YouTube" className={className} />;
+}
+
+function TelegramIcon({ className }: { className?: string; style?: React.CSSProperties }) {
+  return <ImagePlatformIcon src={telegramLogo} alt="Telegram" className={className} />;
 }
 
 const PLATFORMS = [
   { key: "facebook", label: "Facebook", icon: Facebook, color: "#1877F2" },
   { key: "twitter", label: "X (Twitter)", icon: Twitter, color: "#000000" },
   { key: "instagram", label: "Instagram", icon: Instagram, color: "#E4405F" },
-  { key: "linkedin", label: "LinkedIn", icon: Link2, color: "#0A66C2" },
   { key: "tiktok", label: "TikTok", icon: TikTokIcon, color: "#000000" },
-  { key: "youtube", label: "YouTube", icon: Link2, color: "#FF0000" },
-  { key: "threads", label: "Threads", icon: Link2, color: "#111111" },
-  { key: "reddit", label: "Reddit", icon: Link2, color: "#FF4500" },
-  { key: "pinterest", label: "Pinterest", icon: Link2, color: "#BD081C" },
-  { key: "bluesky", label: "Bluesky", icon: Link2, color: "#1185FE" },
-  { key: "googlebusiness", label: "Google Business", icon: Link2, color: "#4285F4" },
-  { key: "telegram", label: "Telegram", icon: Link2, color: "#26A5E4" },
-  { key: "snapchat", label: "Snapchat", icon: Link2, color: "#FFFC00" },
+  { key: "youtube", label: "YouTube", icon: YouTubeIcon, color: "#FF0000" },
+  { key: "telegram", label: "Telegram", icon: TelegramIcon, color: "#26A5E4" },
   { key: "line", label: "LINE OA", icon: LineIcon, color: "#00B900" },
 ] as const;
 
