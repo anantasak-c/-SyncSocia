@@ -1,7 +1,8 @@
+// Prefer Zernio env vars; fall back to Late env vars with their original URL
 const LATE_API_BASE =
   process.env.ZERNIO_API_BASE_URL ||
-  process.env.LATE_API_BASE_URL?.replace("getlate.dev", "zernio.com") ||
-  "https://zernio.com/api";
+  process.env.LATE_API_BASE_URL ||
+  "https://getlate.dev/api";
 const LATE_API_KEY = process.env.ZERNIO_API_KEY || process.env.LATE_API_KEY!;
 
 async function lateRequest<T>(
