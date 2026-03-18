@@ -128,6 +128,7 @@ export default function Dashboard() {
   const [authPassword, setAuthPassword] = useState("");
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [authError, setAuthError] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
 
   // App state
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -355,13 +356,14 @@ export default function Dashboard() {
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
     setAuthError("");
+    setAuthNotice("");
 
     const fn =
       authMode === "login"
         ? supabase.auth.signInWithPassword
         : supabase.auth.signUp;
 
-    const { error } = await fn.call(supabase.auth, {
+    const { error, data } = await fn.call(supabase.auth, {
       email: authEmail,
       password: authPassword,
     });
@@ -370,8 +372,17 @@ export default function Dashboard() {
       setAuthError(
         authMode === "login"
           ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-          : "ข้อความ Confirm ถูกส่งไปที่ Email ของคุณแล้ว"
+          : error.message || "สมัครไม่สำเร็จ กรุณาลองใหม่"
       );
+      return;
+    }
+
+    if (authMode === "register") {
+      if (!data.session) {
+        setAuthNotice("ข้อความ Confirm ถูกส่งไปที่ Email ของคุณแล้ว");
+      } else {
+        setAuthNotice("สมัครสมาชิกสำเร็จแล้ว");
+      }
     }
   }
 
@@ -423,16 +434,29 @@ export default function Dashboard() {
   const fetchAccounts = useCallback(async () => {
     try {
       // 1. Ensure Late profile exists
-      await fetch("/api/profile", { method: "POST" });
+      const bootstrapRes = await fetch("/api/profile", { method: "POST" });
+      const bootstrapData = await bootstrapRes.json();
+
+      if (!bootstrapRes.ok) {
+        throw new Error(
+          bootstrapData.error || "ยังไม่สามารถสร้างโปรไฟล์ผู้ใช้ได้"
+        );
+      }
 
       // 2. Fetch connected accounts from Late
       const res = await fetch("/api/accounts");
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "ไม่สามารถโหลดบัญชีที่เชื่อมต่อได้");
+      }
       let combinedAccounts = data.accounts || [];
 
       // 3. Check for LINE token and add virtual account
       const profileRes = await fetch("/api/profile");
       const profileData = await profileRes.json();
+      if (!profileRes.ok) {
+        throw new Error(profileData.error || "ไม่สามารถโหลดข้อมูลโปรไฟล์ได้");
+      }
       
       if (profileData.profile?.line_access_token) {
         setLineToken(profileData.profile.line_access_token);
@@ -449,8 +473,15 @@ export default function Dashboard() {
       }
 
       setAccounts(combinedAccounts);
-    } catch {
-      console.error("Failed to fetch accounts");
+    } catch (error) {
+      console.error("Failed to fetch accounts", error);
+      setAccounts([]);
+      addToast(
+        error instanceof Error
+          ? error.message
+          : "ยังไม่สามารถเตรียมโปรไฟล์ผู้ใช้ได้",
+        "error"
+      );
     }
   }, []);
 
@@ -645,6 +676,12 @@ export default function Dashboard() {
                 </p>
               )}
 
+              {authNotice && (
+                <p className="text-emerald-600 text-sm text-center bg-emerald-50 rounded-lg py-2">
+                  {authNotice}
+                </p>
+              )}
+
               <button
                 type="submit"
                 className="w-full py-3.5 text-lg font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-200 hover:shadow-primary-300 active:scale-[0.98]"
@@ -655,9 +692,11 @@ export default function Dashboard() {
 
             <div className="mt-5 text-center">
               <button
-                onClick={() =>
-                  setAuthMode(authMode === "login" ? "register" : "login")
-                }
+                onClick={() => {
+                  setAuthMode(authMode === "login" ? "register" : "login");
+                  setAuthError("");
+                  setAuthNotice("");
+                }}
                 className="text-primary-600 hover:text-primary-700 font-medium text-sm transition"
               >
                 {authMode === "login"
