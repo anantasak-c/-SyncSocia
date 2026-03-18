@@ -1,6 +1,8 @@
 const LATE_API_BASE =
-  process.env.LATE_API_BASE_URL || "https://getlate.dev/api";
-const LATE_API_KEY = process.env.LATE_API_KEY!;
+  process.env.ZERNIO_API_BASE_URL ||
+  process.env.LATE_API_BASE_URL?.replace("getlate.dev", "zernio.com") ||
+  "https://zernio.com/api";
+const LATE_API_KEY = process.env.ZERNIO_API_KEY || process.env.LATE_API_KEY!;
 
 async function lateRequest<T>(
   path: string,
@@ -19,7 +21,7 @@ async function lateRequest<T>(
   if (!res.ok) {
     const body = await res.text();
     throw new Error(
-      `Late API error ${res.status}: ${body}`
+      `Zernio API error ${res.status}: ${body}`
     );
   }
 

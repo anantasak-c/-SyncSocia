@@ -94,10 +94,13 @@ export async function GET(req: NextRequest) {
   } catch (err: unknown) {
     console.error("Analytics error:", err);
 
-    // Handle 402 (analytics add-on required)
     const errMsg =
       err instanceof Error ? err.message : "Internal Server Error";
-    if (errMsg.includes("402")) {
+    if (
+      errMsg.includes("402") ||
+      errMsg.includes("Analytics add-on required") ||
+      errMsg.includes("requiresAddon")
+    ) {
       return NextResponse.json(
         {
           error: "Analytics add-on required",

@@ -94,7 +94,16 @@ const PLATFORMS = [
   { key: "facebook", label: "Facebook", icon: Facebook, color: "#1877F2" },
   { key: "twitter", label: "X (Twitter)", icon: Twitter, color: "#000000" },
   { key: "instagram", label: "Instagram", icon: Instagram, color: "#E4405F" },
+  { key: "linkedin", label: "LinkedIn", icon: Link2, color: "#0A66C2" },
   { key: "tiktok", label: "TikTok", icon: TikTokIcon, color: "#000000" },
+  { key: "youtube", label: "YouTube", icon: Link2, color: "#FF0000" },
+  { key: "threads", label: "Threads", icon: Link2, color: "#111111" },
+  { key: "reddit", label: "Reddit", icon: Link2, color: "#FF4500" },
+  { key: "pinterest", label: "Pinterest", icon: Link2, color: "#BD081C" },
+  { key: "bluesky", label: "Bluesky", icon: Link2, color: "#1185FE" },
+  { key: "googlebusiness", label: "Google Business", icon: Link2, color: "#4285F4" },
+  { key: "telegram", label: "Telegram", icon: Link2, color: "#26A5E4" },
+  { key: "snapchat", label: "Snapchat", icon: Link2, color: "#FFFC00" },
   { key: "line", label: "LINE OA", icon: LineIcon, color: "#00B900" },
 ] as const;
 
@@ -126,9 +135,13 @@ export default function Dashboard() {
   const [authLoading, setAuthLoading] = useState(true);
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("");
+  const [authMode, setAuthMode] = useState<
+    "login" | "register" | "forgot" | "reset"
+  >("login");
   const [authError, setAuthError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
+  const [authSubmitting, setAuthSubmitting] = useState(false);
 
   // App state
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -334,6 +347,15 @@ export default function Dashboard() {
   // ----- Auth -----
 
   useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const searchParams = new URLSearchParams(window.location.search);
+    const authType = hashParams.get("type") || searchParams.get("type");
+
+    if (authType === "recovery") {
+      setAuthMode("reset");
+      setAuthNotice("กรุณาตั้งรหัสผ่านใหม่ของคุณ");
+    }
+
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       setUser(u ? { id: u.id, email: u.email ?? undefined } : null);
       setAuthLoading(false);
@@ -341,48 +363,134 @@ export default function Dashboard() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(
         session?.user
           ? { id: session.user.id, email: session.user.email ?? undefined }
           : null
       );
+
+      if (event === "PASSWORD_RECOVERY") {
+        setAuthMode("reset");
+        setAuthError("");
+        setAuthNotice("กรุณาตั้งรหัสผ่านใหม่ของคุณ");
+      }
     });
 
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function switchAuthMode(nextMode: "login" | "register" | "forgot" | "reset") {
+    setAuthMode(nextMode);
+    setAuthError("");
+    setAuthNotice("");
+    setAuthPassword("");
+    setAuthConfirmPassword("");
+  }
+
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
     setAuthError("");
     setAuthNotice("");
+    setAuthSubmitting(true);
 
-    const fn =
-      authMode === "login"
-        ? supabase.auth.signInWithPassword
-        : supabase.auth.signUp;
+    const appUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-    const { error, data } = await fn.call(supabase.auth, {
-      email: authEmail,
-      password: authPassword,
-    });
+    try {
+      if (authMode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(authEmail, {
+          redirectTo: `${appUrl}/`,
+        });
 
-    if (error) {
-      setAuthError(
-        authMode === "login"
-          ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-          : error.message || "สมัครไม่สำเร็จ กรุณาลองใหม่"
-      );
-      return;
-    }
+        if (error) {
+          throw error;
+        }
 
-    if (authMode === "register") {
+        setAuthNotice("ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณแล้ว");
+        switchAuthMode("login");
+        setAuthNotice("ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณแล้ว");
+        return;
+      }
+
+      if (authMode === "register" || authMode === "reset") {
+        if (authPassword.length < 6) {
+          setAuthError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+          return;
+        }
+
+        if (authPassword !== authConfirmPassword) {
+          setAuthError("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+          return;
+        }
+      }
+
+      if (authMode === "reset") {
+        const { error } = await supabase.auth.updateUser({
+          password: authPassword,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        await supabase.auth.signOut();
+        setUser(null);
+        window.history.replaceState({}, "", "/");
+        switchAuthMode("login");
+        setAuthNotice("ตั้งรหัสผ่านใหม่สำเร็จ กรุณาเข้าสู่ระบบอีกครั้ง");
+        return;
+      }
+
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authEmail,
+          password: authPassword,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        return;
+      }
+
+      const { error, data } = await supabase.auth.signUp({
+        email: authEmail,
+        password: authPassword,
+        options: {
+          emailRedirectTo: `${appUrl}/`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
       if (!data.session) {
+        switchAuthMode("login");
         setAuthNotice("ข้อความ Confirm ถูกส่งไปที่ Email ของคุณแล้ว");
       } else {
         setAuthNotice("สมัครสมาชิกสำเร็จแล้ว");
       }
+    } catch (error) {
+      const fallbackMessage =
+        authMode === "login"
+          ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+          : authMode === "forgot"
+            ? "ส่งลิงก์รีเซ็ตรหัสผ่านไม่สำเร็จ กรุณาลองใหม่"
+            : authMode === "reset"
+              ? "ตั้งรหัสผ่านใหม่ไม่สำเร็จ กรุณาลองใหม่"
+              : "สมัครไม่สำเร็จ กรุณาลองใหม่";
+
+      setAuthError(
+        error instanceof Error && error.message ? error.message : fallbackMessage
+      );
+    } finally {
+      setAuthSubmitting(false);
     }
   }
 
@@ -620,7 +728,33 @@ export default function Dashboard() {
 
   // ----- Render: Auth Screen -----
 
-  if (!user) {
+  const isAuthScreen = !user || authMode === "forgot" || authMode === "reset";
+  const authTitle =
+    authMode === "login"
+      ? "เข้าสู่ระบบ"
+      : authMode === "register"
+        ? "สมัครสมาชิก"
+        : authMode === "forgot"
+          ? "ลืมรหัสผ่าน"
+          : "ตั้งรหัสผ่านใหม่";
+  const authDescription =
+    authMode === "login"
+      ? "เข้าสู่ระบบเพื่อเริ่มโพสต์ไปยังหลายแพลตฟอร์มในที่เดียว"
+      : authMode === "register"
+        ? "สร้างบัญชีใหม่เพื่อเริ่มใช้งาน SyncSocial"
+        : authMode === "forgot"
+          ? "กรอกอีเมลที่ใช้สมัคร ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้"
+          : "ตั้งรหัสผ่านใหม่ของคุณ แล้วกลับไปเข้าสู่ระบบอีกครั้ง";
+  const authPrimaryLabel =
+    authMode === "login"
+      ? "เข้าสู่ระบบ"
+      : authMode === "register"
+        ? "สมัครสมาชิก"
+        : authMode === "forgot"
+          ? "ส่งลิงก์รีเซ็ตรหัสผ่าน"
+          : "บันทึกรหัสผ่านใหม่";
+
+  if (isAuthScreen) {
     return (
       <div className="flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md">
@@ -638,37 +772,65 @@ export default function Dashboard() {
 
           <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-primary-100/40 border border-white/60 p-8">
             <h2 className="text-xl font-semibold text-center mb-6">
-              {authMode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}
+              {authTitle}
             </h2>
+            <p className="text-sm text-slate-500 text-center mb-6 leading-relaxed">
+              {authDescription}
+            </p>
 
             <form onSubmit={handleAuth} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
-                  อีเมล
-                </label>
-                <input
-                  type="email"
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 text-lg rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition"
-                  placeholder="your@email.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
-                  รหัสผ่าน
-                </label>
-                <input
-                  type="password"
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 text-lg rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition"
-                  placeholder="••••••••"
-                />
-              </div>
+              {authMode !== "reset" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                    อีเมล
+                  </label>
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    required
+                    disabled={authSubmitting}
+                    className="w-full px-4 py-3 text-lg rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition disabled:opacity-60"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              )}
+
+              {authMode !== "forgot" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                    {authMode === "reset" ? "รหัสผ่านใหม่" : "รหัสผ่าน"}
+                  </label>
+                  <input
+                    type="password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    disabled={authSubmitting}
+                    className="w-full px-4 py-3 text-lg rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition disabled:opacity-60"
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
+
+              {(authMode === "register" || authMode === "reset") && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                    ยืนยันรหัสผ่าน
+                  </label>
+                  <input
+                    type="password"
+                    value={authConfirmPassword}
+                    onChange={(e) => setAuthConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    disabled={authSubmitting}
+                    className="w-full px-4 py-3 text-lg rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition disabled:opacity-60"
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
 
               {authError && (
                 <p className="text-red-500 text-sm text-center bg-red-50 rounded-lg py-2">
@@ -684,25 +846,51 @@ export default function Dashboard() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 text-lg font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-200 hover:shadow-primary-300 active:scale-[0.98]"
+                disabled={authSubmitting}
+                className="w-full py-3.5 text-lg font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-200 hover:shadow-primary-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
               >
-                {authMode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}
+                {authSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+                {authPrimaryLabel}
               </button>
             </form>
 
-            <div className="mt-5 text-center">
-              <button
-                onClick={() => {
-                  setAuthMode(authMode === "login" ? "register" : "login");
-                  setAuthError("");
-                  setAuthNotice("");
-                }}
-                className="text-primary-600 hover:text-primary-700 font-medium text-sm transition"
-              >
-                {authMode === "login"
-                  ? "ยังไม่มีบัญชี? สมัครสมาชิก"
-                  : "มีบัญชีแล้ว? เข้าสู่ระบบ"}
-              </button>
+            <div className="mt-5 space-y-3 text-center">
+              {authMode === "login" && (
+                <>
+                  <button
+                    onClick={() => switchAuthMode("forgot")}
+                    className="text-slate-500 hover:text-slate-700 font-medium text-sm transition"
+                  >
+                    ลืมรหัสผ่าน?
+                  </button>
+                  <div>
+                    <button
+                      onClick={() => switchAuthMode("register")}
+                      className="text-primary-600 hover:text-primary-700 font-medium text-sm transition"
+                    >
+                      ยังไม่มีบัญชี? สมัครสมาชิก
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {authMode === "register" && (
+                <button
+                  onClick={() => switchAuthMode("login")}
+                  className="text-primary-600 hover:text-primary-700 font-medium text-sm transition"
+                >
+                  มีบัญชีแล้ว? เข้าสู่ระบบ
+                </button>
+              )}
+
+              {(authMode === "forgot" || authMode === "reset") && (
+                <button
+                  onClick={() => switchAuthMode("login")}
+                  className="text-primary-600 hover:text-primary-700 font-medium text-sm transition"
+                >
+                  กลับไปหน้าเข้าสู่ระบบ
+                </button>
+              )}
             </div>
           </div>
         </div>
