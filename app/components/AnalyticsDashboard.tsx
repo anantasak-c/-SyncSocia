@@ -399,7 +399,7 @@ export function AnalyticsDashboard() {
                 {SHOWCASE_DAILY_DATA.slice(-14).map((d, i) => {
                   const pct = Math.max((d.metrics.impressions / showcaseMaxImpressions) * 100, 4);
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                    <div key={i} className="flex-1 h-full flex flex-col items-center justify-end gap-1 group relative">
                       <div
                         className="w-full rounded-t-md bg-gradient-to-t from-indigo-500 to-blue-400 hover:from-indigo-600 hover:to-blue-500 transition-all cursor-default"
                         style={{ height: `${pct}%` }}
