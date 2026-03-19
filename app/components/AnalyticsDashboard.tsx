@@ -367,7 +367,7 @@ export function AnalyticsDashboard() {
               <GlowStatCard icon={<BarChart3 className="w-5 h-5" />} color="indigo" label="โพสต์ทั้งหมด" value={SHOWCASE_OVERVIEW.totalPosts} suffix="โพสต์" />
               <GlowStatCard icon={<Eye className="w-5 h-5" />} color="blue" label="ยอดเห็น (Impressions)" value={showcaseTotals.impressions} />
               <GlowStatCard icon={<Users className="w-5 h-5" />} color="violet" label="คนเข้าถึง (Reach)" value={showcaseTotals.reach} />
-              <GlowStatCard icon={<ThumbsUp className="w-5 h-5" />} color="emerald" label="ปฏิสัมพันธ์รวม" value={showcaseTotals.likes + showcaseTotals.comments + showcaseTotals.shares} />
+              <GlowStatCard icon={<Heart className="w-5 h-5" />} color="rose" label="กดไลค์" value={showcaseTotals.likes} />
             </div>
 
             {/* ── Engagement Breakdown Pills ── */}
@@ -410,6 +410,33 @@ export function AnalyticsDashboard() {
               </div>
             </div>
 
+            {/* ── Reach Area Chart ── */}
+            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-violet-500" /> คนเข้าถึง (Reach) 14 วัน
+                </h3>
+                <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">ข้อมูลตัวอย่าง</span>
+              </div>
+              <ReachAreaChart data={SHOWCASE_DAILY_DATA.slice(-14)} />
+            </div>
+
+            {/* ── Engagement Donut + Breakdown ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                  <PieChart className="w-4 h-4 text-rose-500" /> สัดส่วนการมีส่วนร่วม
+                </h3>
+                <EngagementDonut totals={showcaseTotals} />
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" /> Engagement Rate รายวัน
+                </h3>
+                <EngagementLineChart data={SHOWCASE_DAILY_DATA.slice(-14)} />
+              </div>
+            </div>
+
             {/* ── Platform Breakdown ── */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
@@ -441,7 +468,7 @@ export function AnalyticsDashboard() {
                         <div className="flex gap-4 text-[11px] text-slate-500">
                           <span><strong className="text-slate-700">{formatNumber(pb.impressions)}</strong> ยอดเห็น</span>
                           <span><strong className="text-slate-700">{formatNumber(pb.reach)}</strong> เข้าถึง</span>
-                          <span><strong className="text-slate-700">{formatNumber(totalEng)}</strong> ปฏิสัมพันธ์</span>
+                          <span><strong className="text-slate-700">{formatNumber(totalEng)}</strong> กดไลค์</span>
                         </div>
                       </div>
                     </div>
@@ -476,7 +503,7 @@ export function AnalyticsDashboard() {
                         </div>
                         <div className="text-right shrink-0">
                           <div className="text-sm font-bold text-amber-700">{formatNumber(Math.round(slot.avg_engagement))}</div>
-                          <div className="text-[10px] text-slate-400">ปฏิสัมพันธ์เฉลี่ย</div>
+                          <div className="text-[10px] text-slate-400">ไลค์เฉลี่ย</div>
                         </div>
                       </div>
                     );
@@ -869,5 +896,140 @@ function ValueItem({ icon, title, desc }: { icon: React.ReactNode; title: string
         <div className="text-[13px] text-slate-500 leading-relaxed mt-0.5">{desc}</div>
       </div>
     </div>
+  );
+}
+
+function ReachAreaChart({ data }: { data: DailyData[] }) {
+  const W = 560, H = 140, PX = 32, PY = 16;
+  const plotW = W - PX * 2, plotH = H - PY * 2;
+  const maxR = Math.max(...data.map((d) => d.metrics.reach), 1);
+  const points = data.map((d, i) => ({
+    x: PX + (i / (data.length - 1)) * plotW,
+    y: PY + plotH - (d.metrics.reach / maxR) * plotH,
+    val: d.metrics.reach,
+    day: new Date(d.date).getDate(),
+  }));
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+  const area = `${line} L${points[points.length - 1].x},${PY + plotH} L${points[0].x},${PY + plotH} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      {[0, 0.25, 0.5, 0.75, 1].map((r, i) => (
+        <g key={i}>
+          <line x1={PX} y1={PY + plotH * (1 - r)} x2={PX + plotW} y2={PY + plotH * (1 - r)} stroke="#e2e8f0" strokeWidth="0.5" strokeDasharray="3,3" />
+          <text x={PX - 4} y={PY + plotH * (1 - r) + 3} textAnchor="end" className="text-[8px] fill-slate-400">{formatNumber(Math.round(maxR * r))}</text>
+        </g>
+      ))}
+      <path d={area} fill="url(#reachGrad)" />
+      <path d={line} fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {points.map((p, i) => (
+        <g key={i}>
+          <circle cx={p.x} cy={p.y} r="3.5" fill="white" stroke="#8b5cf6" strokeWidth="1.5" />
+          <text x={p.x} y={H - 2} textAnchor="middle" className="text-[8px] fill-slate-400 font-medium">{p.day}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function EngagementDonut({ totals }: { totals: { likes: number; comments: number; shares: number; saves: number; clicks: number; views: number } }) {
+  const segments = [
+    { label: "กดถูกใจ", value: totals.likes, color: "#f43f5e" },
+    { label: "คอมเมนต์", value: totals.comments, color: "#3b82f6" },
+    { label: "แชร์", value: totals.shares, color: "#22c55e" },
+    { label: "บันทึก", value: totals.saves, color: "#f59e0b" },
+    { label: "คลิก", value: totals.clicks, color: "#a855f7" },
+  ];
+  const total = segments.reduce((s, seg) => s + seg.value, 0);
+  const R = 60, CX = 80, CY = 80, SW = 16;
+  const circumference = 2 * Math.PI * R;
+  let offset = 0;
+
+  return (
+    <div className="flex items-center gap-6">
+      <svg viewBox="0 0 160 160" className="w-32 h-32 shrink-0">
+        {segments.map((seg, i) => {
+          const pct = total > 0 ? seg.value / total : 0;
+          const dash = pct * circumference;
+          const gap = circumference - dash;
+          const currentOffset = offset;
+          offset += dash;
+          return (
+            <circle
+              key={i}
+              cx={CX} cy={CY} r={R}
+              fill="none" stroke={seg.color} strokeWidth={SW}
+              strokeDasharray={`${dash} ${gap}`}
+              strokeDashoffset={-currentOffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${CX} ${CY})`}
+            />
+          );
+        })}
+        <text x={CX} y={CY - 4} textAnchor="middle" className="text-lg font-extrabold fill-slate-800">{formatNumber(total)}</text>
+        <text x={CX} y={CY + 12} textAnchor="middle" className="text-[9px] fill-slate-400">รวมทั้งหมด</text>
+      </svg>
+      <div className="space-y-1.5 flex-1">
+        {segments.map((seg) => {
+          const pct = total > 0 ? ((seg.value / total) * 100).toFixed(1) : "0";
+          return (
+            <div key={seg.label} className="flex items-center gap-2 text-xs">
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
+              <span className="text-slate-600 flex-1">{seg.label}</span>
+              <span className="font-bold text-slate-800">{formatNumber(seg.value)}</span>
+              <span className="text-slate-400 w-10 text-right">{pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EngagementLineChart({ data }: { data: DailyData[] }) {
+  const W = 280, H = 140, PX = 8, PY = 16;
+  const plotW = W - PX * 2, plotH = H - PY * 2;
+  const rates = data.map((d) => {
+    const totalEng = d.metrics.likes + d.metrics.comments + d.metrics.shares;
+    return d.metrics.impressions > 0 ? (totalEng / d.metrics.impressions) * 100 : 0;
+  });
+  const maxRate = Math.max(...rates, 1);
+  const points = rates.map((r, i) => ({
+    x: PX + (i / (data.length - 1)) * plotW,
+    y: PY + plotH - (r / maxRate) * plotH,
+    val: r,
+    day: new Date(data[i].date).getDate(),
+  }));
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+  const area = `${line} L${points[points.length - 1].x},${PY + plotH} L${points[0].x},${PY + plotH} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      {[0, 0.5, 1].map((r, i) => (
+        <line key={i} x1={PX} y1={PY + plotH * (1 - r)} x2={PX + plotW} y2={PY + plotH * (1 - r)} stroke="#e2e8f0" strokeWidth="0.5" strokeDasharray="3,3" />
+      ))}
+      <path d={area} fill="url(#engGrad)" />
+      <path d={line} fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {points.map((p, i) => (
+        <g key={i}>
+          <circle cx={p.x} cy={p.y} r="3" fill="white" stroke="#10b981" strokeWidth="1.5" />
+          <text x={p.x} y={H - 2} textAnchor="middle" className="text-[7px] fill-slate-400">{p.day}</text>
+        </g>
+      ))}
+      <text x={PX} y={PY - 4} className="text-[8px] fill-slate-400">{maxRate.toFixed(1)}%</text>
+      <text x={PX} y={PY + plotH + 1} className="text-[8px] fill-slate-400">0%</text>
+    </svg>
   );
 }
