@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import {
   BarChart3,
@@ -31,6 +32,7 @@ import {
   ThumbsUp,
   LayoutDashboard,
 } from "lucide-react";
+import tiktokLogo from "../../Logo/tiktok logo.png";
 
 // ---- Types ----
 
@@ -105,9 +107,14 @@ interface BestTimeSlot {
 
 function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className={className} style={{ ...style, fill: "currentColor" }}>
-      <path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a90.9 90.9 0 1 0-43 79.8h73.9V53.8a40.7 40.7 0 0 1 42.1-40.4 282.1 282.1 0 0 0 88.3 14 401.4 401.4 0 0 0 101.6-19.8v72.3z" />
-    </svg>
+    <Image
+      src={tiktokLogo}
+      alt="TikTok"
+      width={32}
+      height={32}
+      className={className}
+      style={style}
+    />
   );
 }
 
