@@ -19,8 +19,11 @@ import {
   Trash2,
   Zap,
   BarChart3,
+  ArrowUpRight,
 } from "lucide-react";
 import { PostPreview } from "../../components/PostPreview";
+import { BarChartCard, AreaChartCard, LineChartCard } from "./charts";
+import { platformRows, topPosts } from "../_data/mock";
 import lineLogo from "../../../Logo/LINE_logo.svg.png";
 import telegramLogo from "../../../Logo/telegram logo.webp";
 import tiktokLogo from "../../../Logo/tiktok logo.png";
@@ -416,6 +419,67 @@ export function DemoDashboard() {
                 <div className="mt-2 text-xs text-slate-400">{new Date(item.created_at).toLocaleString("th-TH")}</div>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-lg shadow-slate-200/50 backdrop-blur-xl">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-800">Analytics Dashboard</h2>
+              <p className="text-sm text-slate-400">โชว์หน้ารายงานในหน้าเดโมหลักได้เลย โดยใช้ mock-up data ทั้งหมด</p>
+            </div>
+            <a href="/showcase/demo/analytics" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              เปิดแบบเต็มหน้า <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <BarChartCard />
+            <AreaChartCard />
+          </div>
+
+          <div className="mt-6">
+            <LineChartCard />
+          </div>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="text-lg font-semibold text-slate-950">เปรียบเทียบแต่ละแพลตฟอร์ม</div>
+              <div className="mt-2 text-sm text-slate-500">ดูว่าช่องทางไหนทำผลงานดีและควรทุ่มเวลาเพิ่ม</div>
+              <div className="mt-6 space-y-4">
+                {platformRows.map((item) => (
+                  <div key={item.name} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">{item.name}</div>
+                        <div className="mt-1 text-xs text-slate-500">{item.posts} โพสต์ • Reach {item.reach}</div>
+                      </div>
+                      <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: item.color }}>
+                        {item.engagement}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="text-lg font-semibold text-slate-950">โพสต์เด่นของเดือน</div>
+              <div className="mt-2 text-sm text-slate-500">ตัวอย่าง insight ที่ช่วยบอกว่าควรทำคอนเทนต์แบบไหนต่อ</div>
+              <div className="mt-6 space-y-4">
+                {topPosts.map((post, index) => (
+                  <div key={post.title} className="rounded-3xl border border-slate-100 bg-gradient-to-br from-white to-slate-50 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">#{index + 1} {post.title}</div>
+                        <div className="mt-2 text-xs text-slate-500">Reach {post.reach}</div>
+                      </div>
+                      <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">{post.action}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       </main>
