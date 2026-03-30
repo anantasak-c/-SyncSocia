@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ShowcaseShell } from "./_components/showcase-shell";
 
 export const metadata: Metadata = {
   title: "SyncSocial Showcase",
@@ -7,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function ShowcaseLayout({ children }: { children: React.ReactNode }) {
-  return <ShowcaseShell>{children}</ShowcaseShell>;
+  return <>{children}</>;
 }
