@@ -141,7 +141,7 @@ function platformColor(platform: string) {
 // ----- Main Page -----
 
 export default function Dashboard() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   // Auth state
   const [user, setUser] = useState<{ id: string; email?: string } | null>(

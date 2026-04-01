@@ -20,8 +20,10 @@ import {
   Zap,
   BarChart3,
   ArrowUpRight,
+  X,
 } from "lucide-react";
 import { PostPreview } from "../../components/PostPreview";
+import { AnalyticsDashboard } from "../../components/AnalyticsDashboard";
 import { BarChartCard, AreaChartCard, LineChartCard } from "./charts";
 import { platformRows, topPosts } from "../_data/mock";
 import lineLogo from "../../../Logo/LINE_logo.svg.png";
@@ -142,13 +144,15 @@ export function DemoDashboard() {
   });
   const [caption, setCaption] = useState("โปรโมชันสิ้นเดือน ลดทันที พร้อมส่งฟรีวันนี้เท่านั้น สนใจทักแชตได้เลย");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>(DEMO_MEDIA);
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const [previewPlatform, setPreviewPlatform] = useState<"facebook" | "twitter" | "instagram" | "tiktok" | "line">("facebook");
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [history, setHistory] = useState<PostHistory[]>(INITIAL_HISTORY);
   const [hasLineToken, setHasLineToken] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [connectModalPlatform, setConnectModalPlatform] = useState<string | null>(null);
 
   const addToast = (message: string, type: "success" | "error") => {
     const id = Date.now();
@@ -166,8 +170,16 @@ export function DemoDashboard() {
   }
 
   function handleConnect(platform: string) {
-    if (platform === "line") {
-      setConnectingPlatform(platform);
+    // Open fake OAuth modal instead of direct connect
+    setConnectModalPlatform(platform);
+    setShowConnectModal(true);
+  }
+
+  function handleConnectConfirm() {
+    if (!connectModalPlatform) return;
+    
+    if (connectModalPlatform === "line") {
+      setConnectingPlatform(connectModalPlatform);
       setTimeout(() => {
         setHasLineToken(true);
         setAccounts((prev) => {
@@ -175,29 +187,33 @@ export function DemoDashboard() {
           return [...prev, { _id: "line-demo", platform: "line", username: "all-followers", displayName: "LINE OA", isActive: true }];
         });
         setConnectingPlatform(null);
-        addToast("เชื่อมต่อ LINE OA (Demo) สำเร็จแล้ว", "success");
+        setShowConnectModal(false);
+        setConnectModalPlatform(null);
+        addToast("เชื่อมต่อ LINE OA สำเร็จแล้ว", "success");
       }, 700);
       return;
     }
 
-    setConnectingPlatform(platform);
+    setConnectingPlatform(connectModalPlatform);
     setTimeout(() => {
       setAccounts((prev) => {
-        if (prev.some((item) => item.platform === platform)) return prev;
+        if (prev.some((item) => item.platform === connectModalPlatform)) return prev;
         return [
           ...prev,
           {
-            _id: `${platform}-demo`,
-            platform,
-            username: `demo_${platform}`,
-            displayName: `${platformLabel(platform)} Demo Account`,
+            _id: `${connectModalPlatform}-demo`,
+            platform: connectModalPlatform,
+            username: `demo_${connectModalPlatform}`,
+            displayName: `${platformLabel(connectModalPlatform)} Account`,
             isActive: true,
           },
         ];
       });
-      setSelectedAccounts((prev) => ({ ...prev, [`${platform}-demo`]: true }));
+      setSelectedAccounts((prev) => ({ ...prev, [`${connectModalPlatform}-demo`]: true }));
       setConnectingPlatform(null);
-      addToast(`เชื่อมต่อ ${platformLabel(platform)} แบบ Demo สำเร็จแล้ว`, "success");
+      setShowConnectModal(false);
+      setConnectModalPlatform(null);
+      addToast(`เชื่อมต่อ ${platformLabel(connectModalPlatform)} สำเร็จแล้ว`, "success");
     }, 800);
   }
 
@@ -369,30 +385,6 @@ export function DemoDashboard() {
           </div>
         </section>
 
-        {showPreview && (
-          <section className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-lg shadow-slate-200/50 backdrop-blur-xl">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-800">ตัวอย่างโพสต์</h2>
-                <p className="text-sm text-slate-400">สลับพรีวิวได้เหมือนระบบจริง</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(["facebook", "instagram", "twitter", "tiktok", "line"] as const).map((platform) => (
-                  <button key={platform} onClick={() => setPreviewPlatform(platform)} className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize ${previewPlatform === platform ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
-                    {platform}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <PostPreview
-              content={caption}
-              mediaItems={mediaItems}
-              platform={previewPlatform}
-              user={{ name: "SyncSocial Demo", username: "syncsocial_demo" }}
-            />
-          </section>
-        )}
-
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <MiniStat icon={<BarChart3 className="h-4 w-4 text-primary-500" />} label="โพสต์ทั้งหมด" value={analyticsTotals.posts} />
           <MiniStat icon={<Eye className="h-4 w-4 text-cyan-500" />} label="Impressions" value={analyticsTotals.impressions} />
@@ -402,14 +394,14 @@ export function DemoDashboard() {
 
         <section className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-lg shadow-slate-200/50 backdrop-blur-xl">
           <div className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
-            <History className="h-5 w-5 text-slate-400" /> ประวัติการโพสต์แบบ Demo
+            <History className="h-5 w-5 text-slate-400" /> ประวัติการโพสต์
           </div>
           <div className="space-y-3">
             {history.map((item) => (
               <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="text-sm font-medium text-slate-800 line-clamp-1">{item.content}</div>
-                  <div className="text-xs text-emerald-600 font-semibold">สำเร็จ</div>
+                  <div className="text-xs text-emerald-600 font-semibold">โพสต์แล้ว</div>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
                   {item.platforms.map((platform) => (
@@ -433,56 +425,134 @@ export function DemoDashboard() {
             </a>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
-            <BarChartCard />
-            <AreaChartCard />
-          </div>
-
-          <div className="mt-6">
-            <LineChartCard />
-          </div>
-
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="text-lg font-semibold text-slate-950">เปรียบเทียบแต่ละแพลตฟอร์ม</div>
-              <div className="mt-2 text-sm text-slate-500">ดูว่าช่องทางไหนทำผลงานดีและควรทุ่มเวลาเพิ่ม</div>
-              <div className="mt-6 space-y-4">
-                {platformRows.map((item) => (
-                  <div key={item.name} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{item.name}</div>
-                        <div className="mt-1 text-xs text-slate-500">{item.posts} โพสต์ • Reach {item.reach}</div>
-                      </div>
-                      <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: item.color }}>
-                        {item.engagement}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="text-lg font-semibold text-slate-950">โพสต์เด่นของเดือน</div>
-              <div className="mt-2 text-sm text-slate-500">ตัวอย่าง insight ที่ช่วยบอกว่าควรทำคอนเทนต์แบบไหนต่อ</div>
-              <div className="mt-6 space-y-4">
-                {topPosts.map((post, index) => (
-                  <div key={post.title} className="rounded-3xl border border-slate-100 bg-gradient-to-br from-white to-slate-50 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">#{index + 1} {post.title}</div>
-                        <div className="mt-2 text-xs text-slate-500">Reach {post.reach}</div>
-                      </div>
-                      <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">{post.action}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <AnalyticsDashboard showcaseMode={true} showcaseExpanded={true} />
         </section>
       </main>
+
+      {/* Connect Modal */}
+      {showConnectModal && connectModalPlatform && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-50 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-4 py-3 bg-white border-b border-slate-200 flex justify-between items-center">
+              <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                {(() => {
+                  const Icon = platformIcon(connectModalPlatform);
+                  return <Icon className="w-5 h-5" style={{ color: platformColor(connectModalPlatform) }} />;
+                })()}
+                เชื่อมต่อ {platformLabel(connectModalPlatform)}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowConnectModal(false);
+                  setConnectModalPlatform(null);
+                }}
+                className="p-2 hover:bg-slate-100 rounded-full transition"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 bg-slate-100 space-y-4">
+              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  นี่คือหน้าจอจำลองการเชื่อมต่อ OAuth ของ {platformLabel(connectModalPlatform)} 
+                  ในการใช้จริง ระบบจะพาคุณไปยังหน้า login ของแพลตฟอร์มนั้นๆ
+                </p>
+              </div>
+
+              <div className="text-center py-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Zap className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">พร้อมใช้งาน</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleConnectConfirm}
+                  disabled={connectingPlatform === connectModalPlatform}
+                  className="w-full py-3 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-200 hover:shadow-primary-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {connectingPlatform === connectModalPlatform ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      กำลังเชื่อมต่อ...
+                    </>
+                  ) : (
+                    <>
+                      ยืนยันการเชื่อมต่อ
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowConnectModal(false);
+                    setConnectModalPlatform(null);
+                  }}
+                  className="w-full py-2.5 text-sm font-medium text-slate-600 hover:text-slate-800 transition"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-50 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-4 py-3 bg-white border-b border-slate-200 flex justify-between items-center">
+              <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                <Eye className="w-5 h-5 text-primary-500" /> ตัวอย่างโพสต์
+              </h3>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            {/* Tabs */}
+            <div className="flex bg-white border-b border-slate-200 overflow-x-auto">
+              {(["facebook", "twitter", "instagram", "tiktok", "line"] as const).map((p) => {
+                const Icon = platformIcon(p);
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition ${
+                      previewPlatform === p
+                        ? "border-primary-500 text-primary-600 bg-primary-50/30"
+                        : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:inline capitalize">{p}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100">
+              <div className="flex justify-center">
+                <PostPreview
+                  content={caption}
+                  mediaItems={mediaItems}
+                  platform={previewPlatform}
+                  user={{
+                    name: "SyncSocial",
+                    username: "syncsocial",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -223,11 +223,19 @@ function formatNumber(n: number): string {
 
 // ---- Component ----
 
-export function AnalyticsDashboard() {
-  const [loading, setLoading] = useState(true);
+interface AnalyticsDashboardProps {
+  showcaseMode?: boolean;
+  showcaseExpanded?: boolean;
+}
+
+export function AnalyticsDashboard({
+  showcaseMode = false,
+  showcaseExpanded = false,
+}: AnalyticsDashboardProps = {}) {
+  const [loading, setLoading] = useState(!showcaseMode);
   const [error, setError] = useState<string | null>(null);
-  const [addonRequired, setAddonRequired] = useState(false);
-  const [showShowcase, setShowShowcase] = useState(false);
+  const [addonRequired, setAddonRequired] = useState(showcaseMode);
+  const [showShowcase, setShowShowcase] = useState(showcaseMode ? showcaseExpanded : false);
 
   // Data
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
@@ -287,8 +295,19 @@ export function AnalyticsDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (!showcaseMode) {
+      fetchAll();
+    }
+  }, [fetchAll, showcaseMode]);
+
+  useEffect(() => {
+    if (showcaseMode) {
+      setLoading(false);
+      setError(null);
+      setAddonRequired(true);
+      setShowShowcase(showcaseExpanded);
+    }
+  }, [showcaseExpanded, showcaseMode]);
 
   // ---- Loading ----
   if (loading) {
