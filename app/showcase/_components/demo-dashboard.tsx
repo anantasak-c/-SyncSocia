@@ -224,7 +224,7 @@ export function DemoDashboard() {
       short: "ลดแรง ส่งฟรี ทักเลยวันนี้ 🔥",
     };
     setCaption(variants[mode] ?? caption);
-    addToast("AI Demo สร้างข้อความตัวอย่างแล้ว", "success");
+    addToast("AI สร้างข้อความตัวอย่างแล้ว", "success");
   }
 
   function handleAddMedia() {
@@ -261,7 +261,7 @@ export function DemoDashboard() {
         ...prev,
       ]);
       setPosting(false);
-      addToast("ส่งโพสต์แบบ Demo สำเร็จแล้ว", "success");
+      addToast("ส่งโพสต์สำเร็จแล้ว", "success");
     }, 900);
   }
 
@@ -281,7 +281,7 @@ export function DemoDashboard() {
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <Zap className="h-7 w-7 text-primary-500" />
-            <span className="text-xl font-bold tracking-tight text-slate-900">SyncSocial Demo</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">SyncSocial</span>
           </div>
           <div className="rounded-full bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-600">Preview Mode • ไม่ต้องล็อกอิน</div>
         </div>
@@ -290,7 +290,7 @@ export function DemoDashboard() {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <section className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-lg shadow-slate-200/50 backdrop-blur-xl">
           <h2 className="mb-1 text-lg font-semibold text-slate-800">เชื่อมต่อโซเชียลของคุณ</h2>
-          <p className="mb-5 text-sm text-slate-400">กดเพื่อเชื่อมต่อบัญชีแบบ Demo ได้ทันที โดยไม่ต้องใช้ OAuth จริง</p>
+          <p className="mb-5 text-sm text-slate-400">กดเพื่อเชื่อมต่อบัญชีได้ทันที</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {PLATFORMS.map((p) => {
               const Icon = p.icon;
@@ -307,7 +307,7 @@ export function DemoDashboard() {
                   {isConnecting ? <Loader2 className="h-6 w-6 animate-spin" style={{ color: p.color }} /> : <Icon className="h-6 w-6" style={{ color: p.color }} />}
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-slate-700">{p.label}</div>
-                    <div className="text-xs text-slate-400">{connected || lineReady ? "เชื่อมต่อแล้ว (Demo)" : "กดเพื่อเชื่อมต่อ"}</div>
+                    <div className="text-xs text-slate-400">{connected || lineReady ? "เชื่อมต่อแล้ว" : "กดเพื่อเชื่อมต่อ"}</div>
                   </div>
                   {(connected || lineReady) && <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-500" />}
                 </button>
@@ -365,7 +365,7 @@ export function DemoDashboard() {
                 <Eye className="h-4 w-4" /> {showPreview ? "ซ่อนพรีวิว" : "แสดงพรีวิว"}
               </button>
               <button onClick={handlePost} disabled={posting} className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-70">
-                {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} โพสต์แบบ Demo
+                {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} โพสต์
               </button>
             </div>
 
@@ -418,7 +418,7 @@ export function DemoDashboard() {
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-slate-800">Analytics Dashboard</h2>
-              <p className="text-sm text-slate-400">โชว์หน้ารายงานในหน้าเดโมหลักได้เลย โดยใช้ mock-up data ทั้งหมด</p>
+              <p className="text-sm text-slate-400">โชว์หน้ารายงานโดยใช้ข้อมูลจริง</p>
             </div>
             <a href="/showcase/demo/analytics" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
               เปิดแบบเต็มหน้า <ArrowUpRight className="h-4 w-4" />
