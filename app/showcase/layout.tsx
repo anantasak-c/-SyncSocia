@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ShowcaseLanguageProvider } from "./_components/showcase-language";
 
 export const metadata: Metadata = {
   title: "SyncSocial Showcase",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ShowcaseLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <ShowcaseLanguageProvider>{children}</ShowcaseLanguageProvider>;
 }

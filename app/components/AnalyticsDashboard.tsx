@@ -226,11 +226,13 @@ function formatNumber(n: number): string {
 interface AnalyticsDashboardProps {
   showcaseMode?: boolean;
   showcaseExpanded?: boolean;
+  language?: "th" | "en";
 }
 
 export function AnalyticsDashboard({
   showcaseMode = false,
   showcaseExpanded = false,
+  language = "th",
 }: AnalyticsDashboardProps = {}) {
   const [loading, setLoading] = useState(!showcaseMode);
   const [error, setError] = useState<string | null>(null);
@@ -314,7 +316,7 @@ export function AnalyticsDashboard({
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-        <span className="ml-3 text-slate-500">กำลังโหลด Analytics...</span>
+        <span className="ml-3 text-slate-500">{language === "th" ? "กำลังโหลด Analytics..." : "Loading analytics..."}</span>
       </div>
     );
   }
@@ -345,20 +347,19 @@ export function AnalyticsDashboard({
           <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
           <div className="relative z-10 max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-xs font-medium mb-4">
-              <Sparkles className="w-3.5 h-3.5" /> ตัวอย่างรายงาน Analytics
+              <Sparkles className="w-3.5 h-3.5" /> {language === "th" ? "ตัวอย่างรายงาน Analytics" : "Analytics showcase"}
             </div>
             <h2 className="text-xl sm:text-2xl font-bold mb-2 leading-tight">
-              เห็นทุกตัวเลขสำคัญ<br className="sm:hidden" /> ในหน้าเดียว
+              {language === "th" ? <>เห็นทุกตัวเลขสำคัญ<br className="sm:hidden" /> ในหน้าเดียว</> : <>See every key metric<br className="sm:hidden" /> in one place</>}
             </h2>
             <p className="text-sm sm:text-base text-white/80 max-w-xl mx-auto leading-relaxed">
-              รู้ว่าโพสต์ไหนทำผลงานดี แพลตฟอร์มไหนคุ้ม และควรโพสต์เวลาไหน<br className="hidden sm:block" />
-              ไม่ต้องเปิดหลายแอป — ดูที่เดียวจบ
+              {language === "th" ? <>รู้ว่าโพสต์ไหนทำผลงานดี แพลตฟอร์มไหนคุ้ม และควรโพสต์เวลาไหน<br className="hidden sm:block" />ไม่ต้องเปิดหลายแอป — ดูที่เดียวจบ</> : <>See which posts perform best, which channels are worth the investment, and when to publish next.<br className="hidden sm:block" />No need to open multiple apps — everything is here.</>}
             </p>
             <button
               onClick={() => setShowShowcase((v) => !v)}
               className="inline-flex items-center gap-2 mt-5 px-6 py-2.5 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 shadow-lg shadow-indigo-900/30 transition-all active:scale-95"
             >
-              {showShowcase ? "ซ่อนตัวอย่าง" : "ดูตัวอย่าง"} <Play className="w-4 h-4" />
+              {showShowcase ? (language === "th" ? "ซ่อนตัวอย่าง" : "Hide preview") : (language === "th" ? "ดูตัวอย่าง" : "Open preview")} <Play className="w-4 h-4" />
             </button>
           </div>
         </div>
